@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "12kishor/my-react-app"
+        IMAGE_NAME = "your-dockerhub-username/my-react-app:latest"
         SONARQUBE_ENV = "SonarQube"
     }
 
@@ -25,9 +25,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh 'docker build -t ${IMAGE_NAME} .'
-                }
+                sh 'docker build -t ${IMAGE_NAME} .'
             }
         }
 
@@ -39,6 +37,15 @@ pipeline {
                         docker push ${IMAGE_NAME}
                     '''
                 }
+            }
+        }
+
+        stage('Deploy to EKS') {
+            steps {
+                sh '''
+                    kubectl apply -f k8s/deployment.yaml
+                    kubectl apply -f k8s/service.yaml
+                '''
             }
         }
     }
